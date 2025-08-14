@@ -1,7 +1,6 @@
-
 import React from 'react';
-import { Difficulty } from '../types';
-import { DIFFICULTY_NAMES_AR, TOTAL_ROUNDS_PER_LEVEL } from '../constants';
+import { Difficulty } from '../types.ts';
+import { DIFFICULTY_NAMES_AR, TOTAL_ROUNDS_PER_LEVEL } from '../constants.ts';
 
 interface ScoreboardProps {
   score: number;

@@ -1,7 +1,6 @@
-
 import React from 'react';
-import { categorizedWordBank } from '../data/wordBank';
-import { WordPair } from '../types';
+import { categorizedWordBank } from '../data/wordBank.ts';
+import { WordPair } from '../types.ts';
 
 interface CategorySelectorProps {
   onCategorySelected: (words: WordPair[]) => void;

@@ -12,45 +12,31 @@
     <style>
       body {
         font-family: 'Cairo', sans-serif;
-        background-color: #0F172A; /* bg-slate-900 */
+        background-color: #0F172A;
+        color: #f1f5f9;
         background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.08) 1px, transparent 0);
         background-size: 1.5rem 1.5rem;
       }
       [lang="en"] {
         font-family: 'Poppins', sans-serif;
       }
-      /* Keyframes moved here from WordButton component for better practice */
-      @keyframes shake {
-        10%, 90% { transform: translate3d(-1px, 0, 0); }
-        20%, 80% { transform: translate3d(2px, 0, 0); }
-        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-        40%, 60% { transform: translate3d(4px, 0, 0); }
-      }
-      @keyframes correct-flash {
-        0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
-        50% { box-shadow: 0 0 20px 10px rgba(74, 222, 128, 0.5); }
-        100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
-      }
-       @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+      @keyframes correct-flash { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } 50% { box-shadow: 0 0 20px 10px rgba(74, 222, 128, 0.5); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       @keyframes zoomIn { from { transform: scale(0.95); } to { transform: scale(1); } }
-      .animate-in {
-        animation-name: fadeIn, zoomIn;
-        animation-duration: 200ms;
-        animation-timing-function: ease-out;
-      }
-      .animate-shake {
-        animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
-      }
-      .animate-correct-flash {
-        animation: correct-flash 0.3s ease-in-out;
-      }
+      .animate-in { animation-name: fadeIn, zoomIn; animation-duration: 200ms; animation-timing-function: ease-out; }
+      .animate-shake { animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both; }
+      .animate-correct-flash { animation: correct-flash 0.3s ease-in-out; }
     </style>
   <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.1.1/",
     "react": "https://esm.sh/react@^19.1.1",
-    "react-dom/": "https://esm.sh/react-dom@^19.1.1/"
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "react/": "https://esm.sh/react@^19.1.1/",
+    "url": "https://esm.sh/url@^0.11.4",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.0.0",
+    "vite": "https://esm.sh/vite@^7.1.2"
   }
 }
 </script>
@@ -58,7 +44,7 @@
 </head>
   <body class="bg-slate-900 text-slate-100">
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   <script type="module" src="/index.tsx"></script>
 </body>
 </html>

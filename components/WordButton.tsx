@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { SelectionStatus } from '../types';
+import { SelectionStatus } from '../types.ts';
 
 interface WordButtonProps {
   text: string;
@@ -19,8 +18,14 @@ const WordButton: React.FC<WordButtonProps> = ({ text, lang, status, onClick }) 
     [SelectionStatus.INCORRECT]: 'bg-red-600/80 border-red-400 text-white animate-shake',
   };
 
+  // Keyframes for animations are now in index.html, so we can define the animation classes here.
+  const animationClasses = {
+      [SelectionStatus.CORRECT]: 'animate-correct-flash',
+      [SelectionStatus.INCORRECT]: 'animate-shake',
+  }
+
   return (
-    <button lang={lang} onClick={onClick} className={`${baseClasses} ${statusClasses[status]}`}>
+    <button lang={lang} onClick={onClick} className={`${baseClasses} ${statusClasses[status]} ${animationClasses[status] || ''}`}>
       {text}
     </button>
   );

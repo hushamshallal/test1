@@ -1,5 +1,4 @@
-
-import { Difficulty } from './types';
+import { Difficulty } from './types.ts';
 
 interface GameConfig {
   timer: number;

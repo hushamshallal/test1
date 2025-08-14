@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { WordPair, Difficulty, GameState, SelectionStatus, GameMode } from './types';
-import { GAME_CONFIG, TOTAL_ROUNDS_PER_LEVEL, DIFFICULTY_NAMES_AR } from './constants';
-import { allWords, categorizedWordBank } from './data/wordBank';
-import WordButton from './components/WordButton';
-import Scoreboard from './components/Scoreboard';
-import Modal from './components/Modal';
-import CategorySelector from './components/CategorySelector';
+import { WordPair, Difficulty, GameState, SelectionStatus, GameMode } from './types.ts';
+import { GAME_CONFIG, TOTAL_ROUNDS_PER_LEVEL, DIFFICULTY_NAMES_AR } from './constants.ts';
+import { allWords, categorizedWordBank } from './data/wordBank.ts';
+import WordButton from './components/WordButton.tsx';
+import Scoreboard from './components/Scoreboard.tsx';
+import Modal from './components/Modal.tsx';
+import CategorySelector from './components/CategorySelector.tsx';
+import ThemeSelector from './components/ThemeSelector.tsx'; // For later use
 
 // Fisher-Yates shuffle algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -16,6 +16,12 @@ const shuffleArray = <T,>(array: T[]): T[] => {
     [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
   }
   return newArray;
+};
+
+const difficultyLevelMap: Record<Difficulty, 1 | 2 | 3> = {
+  [Difficulty.EASY]: 1,
+  [Difficulty.MEDIUM]: 2,
+  [Difficulty.HARD]: 3,
 };
 
 const App: React.FC = () => {
@@ -80,39 +86,41 @@ const App: React.FC = () => {
   }, []);
 
   const replaceAndShuffle = useCallback((matchedId: number) => {
-    const difficultyLevelMap = { [Difficulty.EASY]: 1, [Difficulty.MEDIUM]: 2, [Difficulty.HARD]: 3 };
     const isTimedModeWithDifficulty = gameMode === GameMode.TIMED;
     
     let wordSource = currentWordBank;
     if (isTimedModeWithDifficulty) {
         const targetLevel = difficultyLevelMap[difficulty];
-        wordSource = currentWordBank.filter(w => w.level === targetLevel);
+        wordSource = currentWordBank.filter((w: WordPair) => w.level === targetLevel);
     }
 
-    let availableWords = wordSource.filter(w => !usedWordIds.has(w.id));
+    let availableWords = wordSource.filter((w: WordPair) => !usedWordIds.has(w.id));
     if (availableWords.length === 0) {
         console.warn("All words for this level used. Resetting word bank for this level.");
         setUsedWordIds(prev => {
             const newSet = new Set(prev);
-            wordSource.forEach(w => newSet.delete(w.id));
+            wordSource.forEach((w: WordPair) => newSet.delete(w.id));
             return newSet;
         });
         availableWords = [...wordSource];
     }
     
     const newWord = shuffleArray(availableWords)[0];
-    setUsedWordIds(prev => new Set(prev).add(newWord.id));
+    if (newWord) {
+        setUsedWordIds(prev => new Set(prev).add(newWord.id));
 
-    const columnToShuffle = lastShuffledColumn === 'ar' ? 'en' : 'ar';
-    setLastShuffledColumn(columnToShuffle);
+        const columnToShuffle = lastShuffledColumn === 'ar' ? 'en' : 'ar';
+        setLastShuffledColumn(columnToShuffle);
 
-    if (columnToShuffle === 'ar') {
-        setArabicWords(prev => shuffleArray(prev.map(w => w.id === matchedId ? newWord : w)));
-        setEnglishWords(prev => prev.map(w => w.id === matchedId ? newWord : w));
-    } else {
-        setEnglishWords(prev => shuffleArray(prev.map(w => w.id === matchedId ? newWord : w)));
-        setArabicWords(prev => prev.map(w => w.id === matchedId ? newWord : w));
+        if (columnToShuffle === 'ar') {
+            setArabicWords(prev => shuffleArray(prev.map((w: WordPair) => w.id === matchedId ? newWord : w)));
+            setEnglishWords(prev => prev.map((w: WordPair) => w.id === matchedId ? newWord : w));
+        } else {
+            setEnglishWords(prev => shuffleArray(prev.map((w: WordPair) => w.id === matchedId ? newWord : w)));
+            setArabicWords(prev => prev.map((w: WordPair) => w.id === matchedId ? newWord : w));
+        }
     }
+
 
     setSelectedArabic(null);
     setSelectedEnglish(null);
@@ -152,25 +160,21 @@ const App: React.FC = () => {
     isProcessingRef.current = false;
     const isTimed = gameMode === GameMode.TIMED;
     const config = isTimed ? GAME_CONFIG[difficulty] : { wordsOnScreen: 5 };
-    const difficultyLevelMap = { [Difficulty.EASY]: 1, [Difficulty.MEDIUM]: 2, [Difficulty.HARD]: 3 };
 
     setUsedWordIds(currentUsedIds => {
         let wordSource = currentWordBank;
         if (isTimed) {
             const targetLevel = difficultyLevelMap[difficulty];
-            wordSource = currentWordBank.filter(w => w.level === targetLevel);
+            wordSource = currentWordBank.filter((w: WordPair) => w.level === targetLevel);
         }
 
-        let availableWords = wordSource.filter(w => !currentUsedIds.has(w.id));
+        let availableWords = wordSource.filter((w: WordPair) => !currentUsedIds.has(w.id));
+        let baseUsedIds = currentUsedIds;
         
         if (availableWords.length < config.wordsOnScreen) {
             console.warn("Word pool for this level exhausted. Resetting pool for level.");
-            const levelWordIds = new Set(wordSource.map(w => w.id));
-            currentUsedIds.forEach(id => {
-                if(levelWordIds.has(id)) {
-                    currentUsedIds.delete(id);
-                }
-            });
+            const levelWordIds = new Set(wordSource.map((w: WordPair) => w.id));
+            baseUsedIds = new Set([...currentUsedIds].filter(id => !levelWordIds.has(id)));
             availableWords = [...wordSource];
         }
 
@@ -179,8 +183,8 @@ const App: React.FC = () => {
         setArabicWords(shuffleArray(wordsForScreen));
         setEnglishWords(shuffleArray(wordsForScreen));
 
-        const newUsedIds = new Set(currentUsedIds);
-        wordsForScreen.forEach(w => newUsedIds.add(w.id));
+        const newUsedIds = new Set(baseUsedIds);
+        wordsForScreen.forEach((w: WordPair) => newUsedIds.add(w.id));
         return newUsedIds;
     });
 
@@ -218,13 +222,12 @@ const App: React.FC = () => {
     }
   };
   
-  // Effect to process a match when both an Arabic and English word are selected
+  // Effect to process a match
   useEffect(() => {
     if (selectedArabic && selectedEnglish) {
         isProcessingRef.current = true;
         
-        // Correct Match
-        if (selectedArabic.id === selectedEnglish.id) {
+        if (selectedArabic.id === selectedEnglish.id) { // Correct Match
             setTimeout(() => {
                 if (gameMode === GameMode.TIMED) {
                     setScore(s => s + GAME_CONFIG[difficulty].pointsPerMatch);
@@ -237,8 +240,7 @@ const App: React.FC = () => {
                 replaceAndShuffle(selectedArabic.id);
             }, 300);
         } 
-        // Incorrect Match
-        else {
+        else { // Incorrect Match
             if (gameMode === GameMode.TIMED) {
               setTimeLeft(prev => Math.max(0, prev - 1));
             } else {
@@ -257,7 +259,7 @@ const App: React.FC = () => {
   }, [selectedArabic, selectedEnglish, gameMode, difficulty, replaceAndShuffle, updateGlobalStats]);
 
 
-  // Effect to check for round/level completion in Timed mode
+  // Effect to check for round/level completion
   useEffect(() => {
     if (gameMode !== GameMode.TIMED || gameState !== GameState.PLAYING) return;
     
@@ -351,10 +353,10 @@ const App: React.FC = () => {
        <div className="w-full flex-1 grid grid-cols-2 gap-4 md:gap-8 relative">
           <div className="absolute left-1/2 -translate-x-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-cyan-500/50 to-transparent"></div>
           <div className="flex flex-col gap-3" dir="rtl">
-            {arabicWords.map((word, index) => <WordButton key={`ar-${word.id}-${index}`} text={word.arabic} lang="ar" status={getStatus(word, 'ar')} onClick={() => handleSelection(word, 'ar')}/>)}
+            {arabicWords.map((word: WordPair) => <WordButton key={`ar-${word.id}`} text={word.arabic} lang="ar" status={getStatus(word, 'ar')} onClick={() => handleSelection(word, 'ar')}/>)}
           </div>
           <div className="flex flex-col gap-3">
-            {englishWords.map((word, index) => <WordButton key={`en-${word.id}-${index}`} text={word.english} lang="en" status={getStatus(word, 'en')} onClick={() => handleSelection(word, 'en')}/>)}
+            {englishWords.map((word: WordPair) => <WordButton key={`en-${word.id}`} text={word.english} lang="en" status={getStatus(word, 'en')} onClick={() => handleSelection(word, 'en')}/>)}
           </div>
       </div>
     </div>
@@ -459,11 +461,12 @@ const App: React.FC = () => {
   return (
     <>
       <main className="min-h-screen bg-slate-900 overflow-hidden pb-12">
+        <ThemeSelector />
         {renderCurrentState()}
         {renderModals()}
       </main>
       <footer className="fixed bottom-0 left-0 right-0 p-2 text-center text-xs text-slate-500 bg-slate-900/30 backdrop-blur-sm z-10">
-        تم التطوير من قبل هشام محسن
+        تم التطوير بواسطة مطور اللعبة
       </footer>
     </>
   );
